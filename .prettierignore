@@ -1,0 +1,9 @@
+**/node_modules
+**/migrations
+**/spec
+**/dist
+.prettierignore
+.env.example
+license.txt
+.gitignore
+.env
