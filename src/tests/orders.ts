@@ -1,5 +1,5 @@
 import supertest from 'supertest';
-import { Order, OrderStore } from '../modules/orders';
+import { OrderStore } from '../modules/orders';
 import app from '../server';
 
 export default function () {
@@ -12,8 +12,8 @@ export default function () {
                 await request
                     .post('/users')
                     .send({
-                        firstname: 'Test',
-                        lastname: 'User',
+                        first_name: 'Test',
+                        last_name: 'User',
                         password: 'password123',
                     })
                     .set('Accept', 'application/json')
@@ -35,85 +35,103 @@ export default function () {
             const store = new OrderStore();
 
             it('Test 1: create should create one order.', async () => {
-                const o: Order = {
-                    userid: 3,
-                    productid: 3,
-                    quantity: 4,
-                };
-                const result = await store.create(o);
+                const result = await store.create('3');
 
-                await store.create(o);
-                o.userid = 4;
-                await store.create(o);
-                o.productid = 4;
-                await store.create(o);
+                await store.create('3');
+                await store.create('4');
 
                 expect(result.status).toEqual('active');
             });
 
-            it('Test 2: currentOrder should return all active orders for a user.', async () => {
-                const result = await store.currentOrder('3');
+            it('Test 2: addProducts should add all products and quantities.', async () => {
+                const products = {
+                    product_id: ['3', '4'],
+                    quantity: ['5', '3'],
+                };
+                const result = await store.addProducts('1', products);
+
+                await store.addProducts('2', products);
+                products.product_id = ['3'];
+                products.quantity = ['7'];
+                await store.addProducts('3', products);
+
+                expect(result).toEqual('All products added successfully.');
+            });
+
+            it('Test 3: activeOrder should return all active orders for a user.', async () => {
+                const result = await store.activeOrder('3');
+
                 expect(result.length).not.toBeNull();
             });
 
-            it('Test 3: complete should mark a certain order as complete.', async () => {
+            it('Test 4: complete should mark a certain order as complete.', async () => {
                 const result = await store.complete('1');
                 expect(result.status).toEqual('complete');
             });
 
-            it('Test 4: completeOrder should return all completed orders for a user.', async () => {
+            it('Test 5: completeOrder should return all completed orders for a user.', async () => {
                 const result = await store.completeOrder('3');
+
                 expect(result.length).not.toBeNull();
             });
 
-            it('Test 5: index should return all orders.', async () => {
-                const result = await store.index();
-                expect(result[0].quantity).toEqual(4);
+            it('Test 6: index should return all orders of a user.', async () => {
+                const result = await store.index('3');
+
+                expect(result[0].quantity).toEqual(5);
             });
 
-            it('Test 6: show should return a certain order.', async () => {
+            it('Test 7: show should return a certain order.', async () => {
                 const result = await store.show('1');
-                expect(result.quantity).toEqual(4);
+                expect(result[0].quantity).toEqual(5);
             });
 
-            it('Test 7: delete should delete a certain order.', async () => {
+            it('Test 8: delete should delete a certain order.', async () => {
                 const result = await store.delete('1');
-                expect(result).toEqual({
-                    id: 1,
-                    userid: 3,
-                    productid: 3,
-                    quantity: 4,
-                    status: 'complete',
-                });
+                expect(result.user_id).toEqual(3);
             });
         });
 
         describe('Testing orders handlers:', () => {
-            it('Test 1: orders route with post method.', async () => {
-                const response = await request.post('/orders').send({
-                    userid: 3,
-                    productid: 3,
-                    quantity: 1,
-                });
+            it('Test 1: orders/:userId route with post method.', async () => {
+                const response = await request
+                    .post('/orders/3')
+                    .set('Authorization', `Bearer ${token}`);
                 expect(response.status).toEqual(200);
                 expect(response.body.status).toEqual('active');
             });
-
-            it('Test 2: orders/:userid/current route with get method.', async () => {
+            it('Test 2: orders/:orderId/add route with post method.', async () => {
                 const response = await request
-                    .get('/orders/3/current')
+                    .post('/orders/4/add')
+                    .send({
+                        product_id: ['3', '4'],
+                        quantity: ['5', '3'],
+                    })
+                    .set('Accept', 'application/json')
+                    .set('Authorization', `Bearer ${token}`);
+                expect(response.status).toEqual(200);
+                expect(response.body).toEqual(
+                    'All products added successfully.'
+                );
+            });
+
+            it('Test 3: orders/:userId/active route with get method.', async () => {
+                const response = await request
+                    .get('/orders/3/active')
                     .set('Authorization', `Bearer ${token}`);
                 expect(response.status).toEqual(200);
                 expect(response.body.length).not.toBeNull();
             });
 
-            it('Test 3: orders/:id route with put method.', async () => {
-                const response = await request.put('/orders/5');
+            it('Test 4: orders/:id route with put method.', async () => {
+                const response = await request
+                    .put('/orders/4')
+                    .set('Authorization', `Bearer ${token}`);
                 expect(response.status).toEqual(200);
                 expect(response.body.status).toEqual('complete');
             });
 
-            it('Test 4: orders/:userid/complete route with get method.', async () => {
+            it('Test 5: orders/:userId/complete route with get method.', async () => {
                 const response = await request
                     .get('/orders/3/complete')
                     .set('Authorization', `Bearer ${token}`);
@@ -121,26 +139,30 @@ export default function () {
                 expect(response.body.length).not.toBeNull();
             });
 
-            it('Test 5: orders route with get method.', async () => {
-                const response = await request.get('/orders');
+            it('Test 6: orders/:userId route with get method.', async () => {
+                const response = await request
+                    .get('/orders/3')
+                    .set('Authorization', `Bearer ${token}`);
                 expect(response.status).toEqual(200);
-                expect(response.body.length).toBeGreaterThan(3);
+                expect(response.body.length).toBeGreaterThanOrEqual(2);
             });
 
-            it('Test 6: orders/:id route with get method.', async () => {
-                const response = await request.get('/orders/5');
+            it('Test 7: orders/:orderId/show route with get method.', async () => {
+                const response = await request
+                    .get('/orders/4/show')
+                    .set('Authorization', `Bearer ${token}`);
                 expect(response.status).toEqual(200);
-                expect(response.body.productid).toEqual(3);
+                expect(response.body[0].product_id).toEqual(3);
             });
 
-            it('Test 7: orders/:id route with delete method.', async () => {
-                const response = await request.delete('/orders/5');
+            it('Test 8: orders/:orderId route with delete method.', async () => {
+                const response = await request
+                    .delete('/orders/4')
+                    .set('Authorization', `Bearer ${token}`);
                 expect(response.status).toEqual(200);
                 expect(response.body).toEqual({
-                    id: 5,
-                    userid: 3,
-                    productid: 3,
-                    quantity: 1,
+                    id: 4,
+                    user_id: 3,
                     status: 'complete',
                 });
             });

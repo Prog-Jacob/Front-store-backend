@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const { PEPPER, SALT_ROUNDS, JWT_AUTH_TOKEN } = process.env;
+const { PEPPER, SALT_ROUNDS, JWT_SECRET } = process.env;
 
 export const authenticateToken = (
     req: Request,
@@ -17,7 +17,7 @@ export const authenticateToken = (
         const token = authHeader && authHeader.split(' ')[1];
         if (token == null) return res.sendStatus(401);
 
-        jwt.verify(token, JWT_AUTH_TOKEN!);
+        jwt.verify(token, JWT_SECRET!);
         next();
     } catch (err) {
         res.status(401);

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Request, Response, Application } from 'express';
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 import { authenticateToken } from '../services/dashboard';
+import { Request, Response, Application } from 'express';
 import { UserStore, User } from '../modules/users';
 
 dotenv.config();
@@ -10,26 +10,36 @@ dotenv.config();
 const store = new UserStore();
 
 const index = async (req: Request, res: Response) => {
-    const users = await store.index();
-    res.json(users);
+    try {
+        const users = await store.index();
+        res.json(users);
+    } catch (err) {
+        res.status(400);
+        res.json(err);
+    }
 };
 
 const show = async (req: Request, res: Response) => {
-    const user = await store.show(req.params.id);
-    res.json(user);
+    try {
+        const user = await store.show(req.params.id);
+        res.json(user);
+    } catch (err) {
+        res.status(400);
+        res.json(err);
+    }
 };
 
 const create = async (req: Request, res: Response) => {
     try {
         const user: User = {
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
             password: req.body.password,
         };
         const newUser = await store.create(user);
 
         if (newUser) {
-            const token = jwt.sign(newUser, process.env.JWT_AUTH_TOKEN!);
+            const token = jwt.sign(newUser, process.env.JWT_SECRET!);
             res.json(token);
         }
         res.status(401);
@@ -42,8 +52,8 @@ const create = async (req: Request, res: Response) => {
 const edit = async (req: Request, res: Response) => {
     try {
         const user: User = {
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
             password: req.body.password,
         };
         const newUser = await store.edit(req.params.id, user);
@@ -55,26 +65,35 @@ const edit = async (req: Request, res: Response) => {
 };
 
 const drop = async (req: Request, res: Response) => {
-    const id = req.params.id;
-    // compare id with user id from token
-    const deletedUser = await store.delete(id);
-    res.json(deletedUser);
+    try {
+        const id = req.params.id;
+        const deletedUser = await store.delete(id);
+        res.json(deletedUser);
+    } catch (err) {
+        res.status(400);
+        res.json(err);
+    }
 };
 
 const authenticatePassword = async (req: Request, res: Response) => {
-    const user = await store.authenticatePassword(
-        req.params.id,
-        req.body.password
-    );
-    if (user) {
-        res.json({
-            message: "You're logged in!",
-        });
-    } else {
-        res.status(401);
-        res.json({
-            message: 'Invalid credentials!',
-        });
+    try {
+        const user = await store.authenticatePassword(
+            req.params.id,
+            req.body.password
+        );
+        if (user) {
+            res.json({
+                message: "You're logged in!",
+            });
+        } else {
+            res.status(401);
+            res.json({
+                message: 'Invalid credentials!',
+            });
+        }
+    } catch (err) {
+        res.status(400);
+        res.json(err);
     }
 };
 

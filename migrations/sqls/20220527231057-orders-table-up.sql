@@ -1,9 +1,6 @@
 CREATE TABLE orders(
   id SeriAL PRIMARY KEY,
-  userid integer,
-  productid integer,
-  quantity integer,
+  user_id integer,
   status varchar(20),
-  FOREIGN KEY (userid) REFERENCES users(id),
-  FOREIGN KEY (productid) REFERENCES products(id)
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );

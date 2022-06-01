@@ -5,13 +5,23 @@ import { ProductStore, Product } from '../modules/products';
 const store = new ProductStore();
 
 const index = async (req: Request, res: Response) => {
-    const products = await store.index();
-    res.json(products);
+    try {
+        const products = await store.index();
+        res.json(products);
+    } catch (err) {
+        res.status(400);
+        res.json(err);
+    }
 };
 
 const show = async (req: Request, res: Response) => {
-    const product = await store.show(req.params.id);
-    res.json(product);
+    try {
+        const product = await store.show(req.params.id);
+        res.json(product);
+    } catch (err) {
+        res.status(400);
+        res.json(err);
+    }
 };
 
 const create = async (req: Request, res: Response) => {
@@ -45,18 +55,33 @@ const edit = async (req: Request, res: Response) => {
 };
 
 const drop = async (req: Request, res: Response) => {
-    const deletedProduct = await store.delete(req.params.id);
-    res.json(deletedProduct);
+    try {
+        const deletedProduct = await store.delete(req.params.id);
+        res.json(deletedProduct);
+    } catch (err) {
+        res.status(400);
+        res.json(err);
+    }
 };
 
 const productsByCategory = async (req: Request, res: Response) => {
-    const products = await store.productsByCategory(req.params.category);
-    res.json(products);
+    try {
+        const products = await store.productsByCategory(req.params.category);
+        res.json(products);
+    } catch (err) {
+        res.status(400);
+        res.json(err);
+    }
 };
 
 const mostPopularProducts = async (req: Request, res: Response) => {
-    const products = await store.mostPopularProducts(req.params.number);
-    res.json(products);
+    try {
+        const products = await store.mostPopularProducts(req.params.number);
+        res.json(products);
+    } catch (err) {
+        res.status(400);
+        res.json(err);
+    }
 };
 
 export default function productRoutes(app: Application): void {

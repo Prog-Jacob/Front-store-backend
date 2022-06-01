@@ -102,7 +102,7 @@ export class ProductStore {
 
     async mostPopularProducts(number: string): Promise<Product[]> {
         try {
-            const sql = `SELECT productId, name, quantity FROM orders INNER JOIN products ON orders.productId = products.id GROUP BY productId, name, quantity ORDER BY COUNT(productId) DESC LIMIT $1`;
+            const sql = `SELECT id, name, quantity FROM products INNER JOIN orders_products ON products.id = orders_products.product_id GROUP BY id, name, quantity ORDER BY COUNT(id) DESC LIMIT $1`;
             const conn = await Client.connect();
             const result = await conn.query(sql, [number]);
 

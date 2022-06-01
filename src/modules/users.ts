@@ -3,8 +3,8 @@ import Client from '../database';
 
 export type User = {
     id?: number;
-    firstname: string;
-    lastname: string;
+    first_name: string;
+    last_name: string;
     password: string;
 };
 
@@ -41,12 +41,12 @@ export class UserStore {
     async create(u: User): Promise<User> {
         try {
             const sql =
-                'INSERT INTO users (firstname, lastname, password) VALUES ($1, $2, $3) RETURNING *';
+                'INSERT INTO users (first_name, last_name, password) VALUES ($1, $2, $3) RETURNING *';
             const conn = await Client.connect();
             const hashedPassword = bcryptPassword(u.password, 'hash');
             const result = await conn.query(sql, [
-                u.firstname,
-                u.lastname,
+                u.first_name,
+                u.last_name,
                 hashedPassword,
             ]);
 
@@ -61,12 +61,12 @@ export class UserStore {
     async edit(id: string, u: User): Promise<User> {
         try {
             const sql =
-                'UPDATE users SET firstname = $1, lastname = $2, password = $3 WHERE id = $4 RETURNING *';
+                'UPDATE users SET first_name = $1, last_name = $2, password = $3 WHERE id = $4 RETURNING *';
             const conn = await Client.connect();
             const hashedPassword = bcryptPassword(u.password, 'hash');
             const result = await conn.query(sql, [
-                u.firstname,
-                u.lastname,
+                u.first_name,
+                u.last_name,
                 hashedPassword,
                 id,
             ]);

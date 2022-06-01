@@ -1,12 +1,12 @@
 import { Request, Response, Application } from 'express';
-import { Order, OrderStore } from '../modules/orders';
+import { OrderStore } from '../modules/orders';
 import { authenticateToken } from '../services/dashboard';
 
 const store = new OrderStore();
 
 const index = async (req: Request, res: Response): Promise<void> => {
     try {
-        const orders = await store.index();
+        const orders = await store.index(req.params.userId);
         res.json(orders);
     } catch (err) {
         res.status(400);
@@ -16,7 +16,7 @@ const index = async (req: Request, res: Response): Promise<void> => {
 
 const show = async (req: Request, res: Response) => {
     try {
-        const order = await store.show(req.params.id);
+        const order = await store.show(req.params.orderId);
         res.json(order);
     } catch (err) {
         res.status(400);
@@ -26,13 +26,22 @@ const show = async (req: Request, res: Response) => {
 
 const create = async (req: Request, res: Response) => {
     try {
-        const order: Order = {
-            productid: req.body.productid,
-            userid: req.body.userid,
-            quantity: req.body.quantity,
-        };
-        const newOrder = await store.create(order);
+        const newOrder = await store.create(req.params.userId);
         res.json(newOrder);
+    } catch (err) {
+        res.status(400);
+        res.json(err);
+    }
+};
+
+const addProducts = async (req: Request, res: Response) => {
+    try {
+        const products = {
+            product_id: req.body.product_id as string[],
+            quantity: req.body.quantity as string[],
+        };
+        const added = await store.addProducts(req.params.orderId, products);
+        res.json(added);
     } catch (err) {
         res.status(400);
         res.json(err);
@@ -41,7 +50,7 @@ const create = async (req: Request, res: Response) => {
 
 const drop = async (req: Request, res: Response) => {
     try {
-        const order = await store.delete(req.params.id);
+        const order = await store.delete(req.params.orderId);
         res.json(order);
     } catch (err) {
         res.status(400);
@@ -51,7 +60,7 @@ const drop = async (req: Request, res: Response) => {
 
 const complete = async (req: Request, res: Response) => {
     try {
-        const order = await store.complete(req.params.id);
+        const order = await store.complete(req.params.orderId);
         res.json(order);
     } catch (err) {
         res.status(400);
@@ -59,9 +68,9 @@ const complete = async (req: Request, res: Response) => {
     }
 };
 
-const currentOrder = async (req: Request, res: Response) => {
+const activeOrder = async (req: Request, res: Response) => {
     try {
-        const order = await store.currentOrder(req.params.id);
+        const order = await store.activeOrder(req.params.userId);
         res.json(order);
     } catch (err) {
         res.status(400);
@@ -71,7 +80,7 @@ const currentOrder = async (req: Request, res: Response) => {
 
 const completeOrder = async (req: Request, res: Response) => {
     try {
-        const order = await store.completeOrder(req.params.id);
+        const order = await store.completeOrder(req.params.userId);
         res.json(order);
     } catch (err) {
         res.status(400);
@@ -80,11 +89,12 @@ const completeOrder = async (req: Request, res: Response) => {
 };
 
 export default function orderRoutes(app: Application): void {
-    app.get('/orders', index);
-    app.get('/orders/:id', show);
-    app.post('/orders', create);
-    app.put('/orders/:id', complete);
-    app.delete('/orders/:id', drop);
-    app.get('/orders/:id/current', authenticateToken, currentOrder);
-    app.get('/orders/:id/complete', authenticateToken, completeOrder);
+    app.get('/orders/:userId', authenticateToken, index);
+    app.get('/orders/:orderId/show', authenticateToken, show);
+    app.post('/orders/:userId', authenticateToken, create);
+    app.post('/orders/:orderId/add', authenticateToken, addProducts);
+    app.delete('/orders/:orderId', authenticateToken, drop);
+    app.put('/orders/:orderId', authenticateToken, complete);
+    app.get('/orders/:userId/active', authenticateToken, activeOrder);
+    app.get('/orders/:userId/complete', authenticateToken, completeOrder);
 }

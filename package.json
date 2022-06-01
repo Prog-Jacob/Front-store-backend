@@ -6,9 +6,9 @@
     "scripts": {
         "start": "nodemon src/server.ts",
         "watch": "tsc-watch --esModuleInterop src/server.ts --outDir ./dist --onSuccess \"node ./dist/server.js\"",
-        "test": "SET ENV=test&& db-migrate up --config database.json -e test && jasmine && db-migrate reset --config database.json -e test",
+        "jasmine": "SET ENV=test&& db-migrate up --config database.json -e test && jasmine && db-migrate reset --config database.json -e test",
         "build": "npx tsc",
-        "best": "npm run build && npm run test",
+        "test": "npm run build && npm run jasmine",
         "lint": "eslint . --ext .ts",
         "format": "prettier --config .prettierrc **/*.* --write"
     },

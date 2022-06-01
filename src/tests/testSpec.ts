@@ -24,9 +24,9 @@ describe('All tests:', async () => {
             expect(response.status).toBe(200);
             expect(response.body.length).toBeGreaterThan(1);
             expect(response.body[0]).toEqual({
-                productid: 3,
+                id: 4,
                 name: 'Product',
-                quantity: 4,
+                quantity: 3,
             });
         });
     });

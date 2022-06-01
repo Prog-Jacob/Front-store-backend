@@ -62,8 +62,8 @@ export default function () {
                     await request
                         .post('/users')
                         .send({
-                            firstname: 'Test',
-                            lastname: 'User',
+                            first_name: 'Test',
+                            last_name: 'User',
                             password: 'password123',
                         })
                         .set('Accept', 'application/json')
@@ -98,7 +98,7 @@ export default function () {
                 expect(response.body[0].price).toEqual(100);
             });
 
-            it('Test 4: products/:productid route with put method.', async () => {
+            it('Test 4: products/:productId route with put method.', async () => {
                 const response = await request
                     .put('/products/2')
                     .send({
@@ -112,13 +112,13 @@ export default function () {
                 expect(response.body.category).toEqual('category');
             });
 
-            it('Test 5: products/:productid route with get method.', async () => {
+            it('Test 5: products/:productId route with get method.', async () => {
                 const response = await request.get('/products/2');
                 expect(response.status).toBe(200);
                 expect(response.body.name).toEqual('new product');
             });
 
-            it('Test 6: products/:productid route with delete method.', async () => {
+            it('Test 6: products/:productId route with delete method.', async () => {
                 const response = await request
                     .delete('/products/2')
                     .set('Accept', 'application/json')
