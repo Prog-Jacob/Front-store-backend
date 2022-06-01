@@ -60,7 +60,7 @@ This is the list for all the variables used in this project. You can copy them i
 > -   PEPPER
 > -   SALT_ROUNDS
 
-> -   JWT_AUTH_TOKEN
+> -   JWT_SECRET
 
 <h3 align="center">
   Thank you!
